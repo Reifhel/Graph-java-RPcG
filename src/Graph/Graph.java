@@ -4,7 +4,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Scanner;
 
 public class Graph {
@@ -12,21 +14,21 @@ public class Graph {
     // classe grafo
     private int tamanho;
     private HashMap<String, Vertice> vertices;
-    
-    // arestas
 
 
+    // construtor
     public Graph() {
         this.tamanho = 0;
         this.vertices = new HashMap<String, Vertice>();
     }
 
+    // função para pegar o tamanho do grafo
     public int getTamanho() {
         return tamanho;
     }
 
     // função para criar um novo vertice
-    private boolean cria_vertice(String nome) {
+    private boolean criaVertice(String nome) {
         // verifica se o vertice já existe
         if (this.vertices.containsKey(nome)) {
             return false;
@@ -39,30 +41,16 @@ public class Graph {
         return true;
     }
 
-    // função para remover vertice
-    private boolean remove_vertice(String nome) {
-        // verifica se o vertice existe
-        if (!this.vertices.containsKey(nome)) {
-            return false;
-        }
-        // remove o vertice do grafo
-        this.vertices.remove(nome);
-
-        // decrementa o tamanho do grafo
-        this.tamanho--;
-        return true;
-    }
-
     // função para criar uma nova aresta
-    private boolean cria_aresta(String origem, String destino, int peso) {
+    private boolean criaAresta(String origem, String destino, int peso) {
         
         // se o vertice de origem não existe, cria um novo
         if (!this.vertices.containsKey(origem)) {
-            this.cria_vertice(origem);
+            this.criaVertice(origem);
         }
         // se o vertice de destino não existe, cria um novo
         if (!this.vertices.containsKey(destino)) {
-            this.cria_vertice(destino);
+            this.criaVertice(destino);
         }
 
         // pegando os vertices de origem e destino
@@ -76,19 +64,19 @@ public class Graph {
     }
 
     // função para criar uma nova aresta
-    public boolean cria_aresta_direcionada(String origem, String destino, int peso) {
-        return this.cria_aresta(origem, destino, peso);
+    public boolean criaArestaDirecionada(String origem, String destino, int peso) {
+        return this.criaAresta(origem, destino, peso);
     }
 
     // função para criar uma nova aresta
-    public boolean cria_aresta_nao_direcionada(String origem, String destino, int peso) {
-        this.cria_aresta(origem, destino, peso);
-        this.cria_aresta(destino, origem, peso);
+    public boolean criaArestaNaoDirecionada(String origem, String destino, int peso) {
+        this.criaAresta(origem, destino, peso);
+        this.criaAresta(destino, origem, peso);
         return true;
     }
 
     // função para imprimir o grafo
-    public void imprime_grafo(){
+    public void imprimeGrafo(){
         // percorre todos os vertices do grafo
         for (String nomeVertice : this.vertices.keySet()) {
             // pega o vertice
@@ -105,11 +93,92 @@ public class Graph {
         }
     }
 
-    // gravação em formnato pajek
-    public void grava_pajek(String nomeArquivo){
+    // função de busca de profundidade
+    public List<Vertice> busca_Profundidade(String nomeVertice) {
+        
+        // limpando a lista de visitados
+        this.limpaVertices();
+        
+        // cria uma lista de vertices
+        List<Vertice> vertices = new ArrayList<Vertice>();
+        // pega o vertice de origem
+        Vertice vertice = this.vertices.get(nomeVertice);
+        // chama a função de busca em profundidade
+        this.busca_Profundidade(vertice, vertices);
+        // retorna a lista de vertices
+        return vertices;
+    }
 
-        String filePath = "output/" + nomeArquivo + ".txt";
-        System.out.println(filePath);
+    private void busca_Profundidade(Vertice vertice, List<Vertice> vertices) {
+        // marca o vertice como visitado
+        vertice.setVisitado(true);
+        // adiciona o vertice na lista de vertices
+        vertices.add(vertice);
+        // percorre a lista de adjacencia do vertice
+        for (Aresta aresta : vertice.getListaAdjacencia()) {
+            // pega o vertice de destino da aresta
+            Vertice destino = aresta.getDestino();
+            // verifica se o vertice de destino já foi visitado
+            if (!destino.getVisitado()) {
+                // chama a função de busca em profundidade
+                this.busca_Profundidade(destino, vertices);
+            }
+        }
+    }
+
+    // função de busca em largura
+    public List<Vertice> busca_Largura(String nomeVertice) {
+        
+        // limpando a lista de visitados
+        this.limpaVertices();
+        
+        // cria uma lista de vertices
+        List<Vertice> vertices = new ArrayList<Vertice>();
+        // pega o vertice de origem
+        Vertice vertice = this.vertices.get(nomeVertice);
+        // chama a função de busca em largura
+        this.busca_Largura(vertice, vertices);
+        // retorna a lista de vertices
+        return vertices;
+    }
+
+    private void busca_Largura(Vertice vertice, List<Vertice> vertices) {
+        // cria uma fila de vertices
+        List<Vertice> fila = new ArrayList<Vertice>();
+        // marca o vertice como visitado
+        vertice.setVisitado(true);
+        // adiciona o vertice na fila
+        fila.add(vertice);
+        // percorre a fila
+        while (!fila.isEmpty()) {
+            // pega o primeiro vertice da fila
+            Vertice v = fila.remove(0);
+            // adiciona o vertice na lista de vertices
+            vertices.add(v);
+            // percorre a lista de adjacencia do vertice
+            for (Aresta aresta : v.getListaAdjacencia()) {
+                // pega o vertice de destino da aresta
+                Vertice destino = aresta.getDestino();
+                // verifica se o vertice de destino já foi visitado
+                if (!destino.getVisitado()) {
+                    // marca o vertice como visitado
+                    destino.setVisitado(true);
+                    // adiciona o vertice na fila
+                    fila.add(destino);
+                }
+            }
+        }
+    }
+
+    // funções projeto colaborativo 2
+
+    // Módulo de gravação de Grafo, ponderado e rotulado em Arquivo (Formato Pajek em anexo);
+    public void gravaPajek(String nomeArquivo){
+
+        System.out.println("--------------------------------");
+        String filePath = "src/output/" + nomeArquivo + ".txt";
+        System.out.println("Guardando no caminho -> " + filePath);
+        System.out.println("--------------------------------");
 
         File arquivo = new File(filePath);
         try {
@@ -156,10 +225,12 @@ public class Graph {
         
     }
     
-    // função para carrergar um grafo a partir de um arquivo pajek
-    public void carrega_pajek(String nomeArquivo){
-        String filePath = "input/" + nomeArquivo + ".txt";
-        System.out.println(filePath);
+    // Módulo de carregamento de Grafo de Arquivo (Formato Pajek em anexo);
+    public void carregaPajek(String nomeArquivo){
+        System.out.println("--------------------------------");
+        String filePath = "src/output/" + nomeArquivo + ".txt";
+        System.out.println("Carregando do caminho -> " + filePath);
+        System.out.println("--------------------------------");
 
         File arquivo = new File(filePath);
         try {
@@ -182,7 +253,7 @@ public class Graph {
                     break;
                 }
                 // cria o vertice
-                this.cria_vertice(linha);
+                this.criaVertice(linha);
             }
             // percorre todos os vertices do grafo
             while (scanner.hasNextLine()) {
@@ -190,7 +261,7 @@ public class Graph {
                 linha = scanner.nextLine();
                 // cria o vertice
                 String[] aresta = linha.split(" ");
-                this.cria_aresta(aresta[0], aresta[1], Integer.parseInt(aresta[2]));
+                this.criaAresta(aresta[0], aresta[1], Integer.parseInt(aresta[2]));
             }
             // fecha o arquivo
             scanner.close();
@@ -201,7 +272,230 @@ public class Graph {
         }
 
         
+    }  
+    
+    // função para verificar a conexidade do grafo ( caso seja desconexo mostra os subgrafos)
+        // um grafo conexo é aquele que possui apenas um componente
+        // um grafo desconexo é aquele que possui mais de um componente
+    
+    public void verificaConexidade(){
+        getComponentes();
+    }
+
+    // função para verificar se o grafo é euleriano
+        // um grafo euleriano é um grafo conexo e todo vertice tem grau par
+        // um grafo semi-euleriano é um grafo conexo e tem exatamente 2 vertices de grau impar
+
+    public void verificaEuleriano(){
+        // caso o grafo seja conexo
+        if(conexo()){
+            // percorre todos os vertices do grafo
+            int contaVerticesImpares = 0;
+            for (String nomeVertice : this.vertices.keySet()) {
+                // pega o vertice
+                Vertice vertice = this.vertices.get(nomeVertice);
+                // se o grau do vertice for impar
+                if(vertice.getGrau() % 2 != 0){
+                    // incrementa o contador de vertices impares
+                    contaVerticesImpares++;
+
+                }
+            }
+
+            // se o contador de vertices impares for igual a 0 ou 2
+            if(contaVerticesImpares == 0 || contaVerticesImpares == 2){
+                // o grafo é euleriano
+                System.out.println("O grafo é euleriano!");
+            } // se o contador de vertices impares for maior que 2
+            else{
+                // o grafo não é euleriano
+                System.out.println("O grafo não é euleriano!");
+            }
+        } // caso o grafo seja desconexo
+        else {
+            // como o grafo é desconexo, ele não é euleriano
+            System.out.println("O grafo não é euleriano!");
+        }
+    }
+
+    // função para verificar se o grafo é ciclico
+        // para um grafo ser ciclico ele tem que ir de vertice em vertice 
+        // sem que o vertice de destino já tenha sido visitado
+    public void verificaCiclo(){
+        // reseta a lista de vertices visitados
+        this.limpaVertices();
+
+        // percorre todos os vertices do grafo
+        for (String nomeVertice : this.vertices.keySet()) {
+            // pega o vertice
+            Vertice vertice = this.vertices.get(nomeVertice);
+            // se o vertice não foi visitado
+            if(!vertice.getVisitado()){
+                // verifica se o vertice tem ciclo
+                if(verificaCiclo(vertice)){
+                    // o grafo tem ciclo
+                    System.out.println("O grafo tem ciclo!");
+                    return;
+                }
+            }
+        }
+    }
+
+    // função para verificar se o vertice tem ciclo
+    private boolean verificaCiclo(Vertice vertice){
+        // marca o vertice como visitado
+        vertice.setVisitado(true);
+        // percorre a lista de adjacencia do vertice
+        for (Aresta aresta : vertice.getListaAdjacencia()) {
+            // pega o vertice de destino da aresta
+            Vertice verticeDestino = aresta.getDestino();
+            // se o vertice de destino não foi visitado
+            if(!verticeDestino.getVisitado()){
+                // verifica se o vertice de destino tem ciclo
+                if(verificaCiclo(verticeDestino)){
+                    // o vertice tem ciclo
+                    return true;
+                }
+            } // se o vertice de destino já foi visitado
+            else{
+                // o vertice tem ciclo
+                return true;
+            }
+        }
+        // o vertice não tem ciclo
+        return false;
     }
 
 
+    // utilidades
+
+    // Função que verifica se o grafo é conexo ou não;
+    private boolean conexo(){
+        // cria uma lista de vertices visitados
+        List<Vertice> visitados = new ArrayList<Vertice>();
+        // cria uma lista de vertices a serem visitados
+        List<Vertice> fila = new ArrayList<Vertice>();
+        // adiciona o primeiro vertice na lista de vertices a serem visitados
+        fila.add(this.vertices.get(this.vertices.keySet().iterator().next()));
+        // enquanto a lista de vertices a serem visitados não estiver vazia
+        while (!fila.isEmpty()) {
+            // pega o primeiro vertice da lista de vertices a serem visitados
+            Vertice vertice = fila.remove(0);
+            
+            // se o vertice não foi visitado
+            if(!visitados.contains(vertice)){
+                // adiciona o vertice na lista de vertices visitados
+                visitados.add(vertice);
+                // percorre a lista de adjacencia do vertice
+                for (Aresta aresta : vertice.getListaAdjacencia()) {
+                    // adiciona o vertice de destino na lista de vertices a serem visitados
+                    fila.add(aresta.getDestino());
+                }
+            }
+            
+        }
+        // se o tamanho da lista de vertices visitados for igual ao tamanho do grafo
+        if (visitados.size() == this.tamanho) {
+            // o grafo é conexo
+            return true;
+        }
+        // o grafo não é conexo
+        return false;
+    }
+    
+    // função que mostra os componentes do grafo caso seja desconexo 
+    private void getComponentes(){
+        // caso seja conexo não há componentes
+        if(conexo()){
+            System.out.println("O grafo é conexo!");
+        } // caso seja desconexo retorna os subgrafos
+        else {
+            
+            // lista de subgrafos
+            
+            List<List<Vertice>> subgrafos = new ArrayList<List<Vertice>>();
+            
+            // cria uma lista de vertices visitados
+            List<Vertice> visitados = new ArrayList<Vertice>();
+            // cria uma lista de vertices a serem visitados
+            List<Vertice> fila = new ArrayList<Vertice>();
+            
+            // percorre todos os vertices do grafo
+            for (String nomeVertice : this.vertices.keySet()) {
+                // pega o vertice
+                Vertice vertice = this.vertices.get(nomeVertice);
+                
+                // se o vertice não foi visitado
+                if(!visitados.contains(vertice)){
+                    // cria uma lista de vertices para o subgrafo
+                    List<Vertice> subgrafo = new ArrayList<Vertice>();
+                    // adiciona o vertice na lista de vertices a serem visitados
+                    fila.add(vertice);
+                    // enquanto a lista de vertices a serem visitados não estiver vazia
+                    while (!fila.isEmpty()) {
+                        // pega o primeiro vertice da lista de vertices a serem visitados
+                        Vertice v = fila.remove(0);
+                        // se o vertice não foi visitado
+                        if(!visitados.contains(v)){
+                            // adiciona o vertice na lista de vertices visitados
+                            visitados.add(v);
+                            // adiciona o vertice na lista de vertices do subgrafo
+                            subgrafo.add(v);
+                            // percorre a lista de adjacencia do vertice
+                            for (Aresta aresta : v.getListaAdjacencia()) {
+                                // adiciona o vertice de destino na lista de vertices a serem visitados
+                                fila.add(aresta.getDestino());
+                            }
+                        }
+                    }
+                    // adiciona o subgrafo na lista de subgrafos
+                    subgrafos.add(subgrafo);
+                }
+            }
+            
+            System.out.println("O grafo é desconexo!");
+            System.out.printf("O grafo tem %d componentes e eles são: \n", subgrafos.size());
+            
+            // percorre todos os subgrafos
+            int contador  = 1;
+            for (List<Vertice> subgrafo : subgrafos) {
+                // percorre todos os vertices do subgrafo
+                System.out.println("Subgrafo " + contador + ": ");
+                for (Vertice vertice : subgrafo) {
+                    // imprime o nome do vertice
+                    System.out.print(vertice.getNome() + " ");
+                }
+                contador++;
+                // pula uma linha
+                System.out.println();
+            }
+            
+        }
+        
+    }
+
+    // função para limpar os vertices do grafo
+    private void limpaVertices() {
+        // percorre todos os vertices do grafo
+        for (String nomeVertice : this.vertices.keySet()) {
+            // pega o vertice
+            Vertice vertice = this.vertices.get(nomeVertice);
+            // limpa o vertice
+            vertice.setVisitado(false);
+        }
+    }
+
+    // função para mostrar todas as informações do grafo
+    public void infoGrafo(){
+        System.out.println("--------------------------------");
+        System.out.println("Informações do grafo: ");
+        System.out.println("Tamanho do grafo: " + this.tamanho); // mostra o tamanho do grafo
+        System.out.print("Conexidade: " ); this.verificaConexidade(); // mostra a conexidade do grafo e seus componentes caso desconexo
+        System.out.print("Euleriano: " ); this.verificaEuleriano(); // mostra se o grafo é euleriano
+
+        // print do grafo com a lista de adjacencia
+        System.out.println("--------------------------------");
+        this.imprimeGrafo();
+        System.out.println("--------------------------------");
+    }
 }

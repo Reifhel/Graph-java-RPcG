@@ -1,19 +1,16 @@
-## Getting Started
+# Graph Java Class
 
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
+Trabalho sendo desenvolvido para a faculdade na materia de Resolução de Problemas com Grafos (RPcG)
+## Funções base do grafo
+- criar aresta, tanto direcionada quanto não direcionada
+- mostrar tamanho do grafo
+- imprimir ele, mostrando a lista de adjacencia
+- imprimir as propriedades dele (Tamanho, conexidade, se é euleriano, ciclico ou nao...)
 
-## Folder Structure
-
-The workspace contains two folders by default, where:
-
-- `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
-
-Meanwhile, the compiled output files will be generated in the `bin` folder by default.
-
-> If you want to customize the folder structure, open `.vscode/settings.json` and update the related settings there.
-
-## Dependency Management
-
-The `JAVA PROJECTS` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-dependency#manage-dependencies).
-# Graph-java-RPcG
+## Funções "avançadas" no grafo
+- Busca de Profundidade (BFS)
+- Busca de Largura (DFS)
+- Verificar se ele é ciclico ( a fazer... )
+- Verificar se ele é euleriano
+- Verificar se ele é conexo
+- Gerar grafos aleatorios através de 3 informações, qntd de vertices e arestas e se ele é conexo ( A fazer...)

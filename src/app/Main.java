@@ -9,9 +9,8 @@ public class Main {
         Graph graph = new Graph();
 
         graph.carregaPajek("teste");
+        graph.centralidadeProximidade();
         //graph.gravaPajek("teste");
-
-        graph.verificaCiclo();
 
         //graph.infoGrafo();
 

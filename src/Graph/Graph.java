@@ -6,7 +6,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Scanner;
 
 public class Graph {
@@ -22,6 +24,10 @@ public class Graph {
         this.vertices = new HashMap<String, Vertice>();
     }
 
+    public List<Vertice> getVertices() {
+        return new ArrayList<Vertice>(vertices.values());
+    }
+
     // função para pegar o tamanho do grafo
     public int getTamanho() {
         return tamanho;
@@ -34,7 +40,7 @@ public class Graph {
             return false;
         }
         // cria o vertice e o adiciona ao grafo
-        this.vertices.put(nome, new Vertice(nome));
+        this.vertices.put(nome, new Vertice(nome, this.tamanho));
 
         // incrementa o tamanho do grafo
         this.tamanho++;
@@ -96,15 +102,16 @@ public class Graph {
     // função de busca de profundidade
     public List<Vertice> busca_Profundidade(String nomeVertice) {
         
-        // limpando a lista de visitados
-        this.limpaVertices();
-        
         // cria uma lista de vertices
         List<Vertice> vertices = new ArrayList<Vertice>();
         // pega o vertice de origem
         Vertice vertice = this.vertices.get(nomeVertice);
         // chama a função de busca em profundidade
         this.busca_Profundidade(vertice, vertices);
+
+        // limpando a lista de visitados
+        this.limpaVertices();
+        
         // retorna a lista de vertices
         return vertices;
     }
@@ -129,15 +136,15 @@ public class Graph {
     // função de busca em largura
     public List<Vertice> busca_Largura(String nomeVertice) {
         
-        // limpando a lista de visitados
-        this.limpaVertices();
-        
         // cria uma lista de vertices
         List<Vertice> vertices = new ArrayList<Vertice>();
         // pega o vertice de origem
         Vertice vertice = this.vertices.get(nomeVertice);
         // chama a função de busca em largura
         this.busca_Largura(vertice, vertices);
+
+        // limpando a lista de visitados
+        this.limpaVertices();
         // retorna a lista de vertices
         return vertices;
     }
@@ -168,8 +175,11 @@ public class Graph {
                 }
             }
         }
+        // limpa a lista de visitados
+        this.limpaVertices();
     }
 
+    
     // funções projeto colaborativo 2
 
     // Módulo de gravação de Grafo, ponderado e rotulado em Arquivo (Formato Pajek em anexo);
@@ -282,7 +292,7 @@ public class Graph {
         getComponentes();
     }
 
-    // função para verificar se o grafo é euleriano
+    // Função que verifica se o grafo é Euleriano ou não
         // um grafo euleriano é um grafo conexo e todo vertice tem grau par
         // um grafo semi-euleriano é um grafo conexo e tem exatamente 2 vertices de grau impar
 
@@ -318,12 +328,10 @@ public class Graph {
         }
     }
 
-    // função para verificar se o grafo é ciclico
+    // Função que verifica se o grafo é Cíclico ou não
         // para um grafo ser ciclico ele tem que ir de vertice em vertice 
         // sem que o vertice de destino já tenha sido visitado
     public void verificaCiclo(){
-        // reseta a lista de vertices visitados
-        this.limpaVertices();
 
         // percorre todos os vertices do grafo
         for (String nomeVertice : this.vertices.keySet()) {
@@ -335,10 +343,14 @@ public class Graph {
                 if(verificaCiclo(vertice)){
                     // o grafo tem ciclo
                     System.out.println("O grafo tem ciclo!");
+                    this.limpaVertices();
                     return;
                 }
             }
         }
+        // o grafo não tem ciclo
+        System.out.println("O grafo não tem ciclo!");
+        this.limpaVertices();
     }
 
     // função para verificar se o vertice tem ciclo
@@ -366,9 +378,72 @@ public class Graph {
         return false;
     }
 
+    // Função que calcula a Centralidade de Proximidade de cada nó (considere a distância do melhor caminho);
+    public void centralidadeProximidade(){
 
-    // utilidades
+        for(Vertice origin : this.vertices.values()){
+            // criando as variaveis
+            Queue<Vertice> fila = new LinkedList<>(); // fila para percorrer o grafo
+            int[] distancias = new int[this.tamanho + 1]; // vetor para guardar as distancias
 
+            // zerando as distancias
+            for(int i = 0; i < distancias.length; i++){
+                distancias[i] = -1;
+            }
+
+            // colocando o vertice de origem na fila
+            fila.add(origin);
+
+            // colocando a distancia do vertice de origem como 0
+            distancias[origin.getId()] = 0;
+            origin.setVisitado(true);
+
+            // enquanto a fila não estiver vazia
+            while(!fila.isEmpty()){
+                fila.remove(); // remove o vertice da fila
+                // percorre a lista de adjacencia do vertice
+                for (Aresta aresta : origin.getListaAdjacencia()) {
+                    // pega o vertice de destino da aresta
+                    Vertice verticeDestino = aresta.getDestino();
+                    // se o vertice de destino não foi visitado
+                    if(!verticeDestino.getVisitado()){
+                        // marca o vertice de destino como visitado
+                        verticeDestino.setVisitado(true);
+                        // adiciona o vertice de destino na fila
+                        fila.add(verticeDestino);
+                        // atualiza a distancia do vertice de destino
+                        distancias[verticeDestino.getId()] = distancias[origin.getId()] + 1;
+                    }
+                }
+
+            }
+
+            // calcula a centralidade de proximidade do vertice
+            calculaProximidade(origin, distancias);
+
+            // limpa os vertices
+            this.limpaVertices();
+
+        }
+    }
+    
+    
+    // utilitários
+
+    // função de calculo da centralidade de proximidade
+    private void calculaProximidade(Vertice origin, int[] distancias){
+        double centralidade = 0; // variavel para guardar a centralidade de proximidade
+        for(int i = 1; i < distancias.length; i++){
+            centralidade += Math.pow(2, -distancias[i]); // soma a centralidade
+        }
+
+        // imprime a centralidade de proximidade do vertice
+        System.out.println("Centralidade de proximidade do vertice " + origin.getNome() + ": " + centralidade);
+        // adiciona a centralidade de proximidade do vertice no vertice
+        origin.setProximidade(centralidade);
+    }
+    
+    
     // Função que verifica se o grafo é conexo ou não;
     private boolean conexo(){
         // cria uma lista de vertices visitados
@@ -474,7 +549,7 @@ public class Graph {
         
     }
 
-    // função para limpar os vertices do grafo
+    // função para limpar o estado de visitado do vertices do grafo
     private void limpaVertices() {
         // percorre todos os vertices do grafo
         for (String nomeVertice : this.vertices.keySet()) {

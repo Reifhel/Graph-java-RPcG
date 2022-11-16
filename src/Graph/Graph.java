@@ -28,9 +28,35 @@ public class Graph {
         return new ArrayList<Vertice>(vertices.values());
     }
 
+    public Vertice getVertice(String nome) {
+        return vertices.get(nome);
+    }
+
+    public Vertice getVertice(int id){
+        for(Vertice v : vertices.values()){
+            if(v.getId() == id){
+                return v;
+            }
+        }
+        return null;
+    }
+
     // função para pegar o tamanho do grafo
     public int getTamanho() {
         return tamanho;
+    }
+
+    private boolean criaVertice(String nome, int id) {
+        // verifica se o vertice já existe
+        if (this.vertices.containsKey(nome)) {
+            return false;
+        }
+        // cria o vertice e o adiciona ao grafo
+        this.vertices.put(nome, new Vertice(nome, id));
+
+        // incrementa o tamanho do grafo
+        this.tamanho++;
+        return true;
     }
 
     // função para criar um novo vertice
@@ -69,6 +95,18 @@ public class Graph {
         return true;
     }
 
+    private boolean criaAresta(int idOrigem, int idDestino, int peso){
+        try{
+            String origem = getVertice(idOrigem).getNome();
+            String destino = getVertice(idDestino).getNome();
+            criaAresta(origem, destino, peso);
+            return true;
+        }
+        catch(Exception e){
+            return false;
+        }
+    }
+
     // função para criar uma nova aresta
     public boolean criaArestaDirecionada(String origem, String destino, int peso) {
         return this.criaAresta(origem, destino, peso);
@@ -80,6 +118,8 @@ public class Graph {
         this.criaAresta(destino, origem, peso);
         return true;
     }
+
+
 
     // função para imprimir o grafo
     public void imprimeGrafo(){
@@ -179,16 +219,12 @@ public class Graph {
         this.limpaVertices();
     }
 
-    
     // funções projeto colaborativo 2
 
     // Módulo de gravação de Grafo, ponderado e rotulado em Arquivo (Formato Pajek em anexo);
     public void gravaPajek(String nomeArquivo){
 
-        System.out.println("--------------------------------");
         String filePath = "src/output/" + nomeArquivo + ".txt";
-        System.out.println("Guardando no caminho -> " + filePath);
-        System.out.println("--------------------------------");
 
         File arquivo = new File(filePath);
         try {
@@ -203,11 +239,12 @@ public class Graph {
             bufferedWriter.newLine();
             // percorre todos os vertices do grafo
             for (String nomeVertice : this.vertices.keySet()) {
-                // pega o vertice
+               // pega o vertice
                 Vertice vertice = this.vertices.get(nomeVertice);
-                // escreve o nome do vertice
-                bufferedWriter.write(vertice.getNome());
+                // escreve o vertice no arquivo e o seu id
+                bufferedWriter.write(vertice.getId() + " \"" + vertice.getNome() + "\"");
                 bufferedWriter.newLine();
+
             }
             // escreve o cabeçalho do arquivo
             bufferedWriter.write("*Edges");
@@ -219,13 +256,17 @@ public class Graph {
                 // percorre a lista de adjacencia do vertice
                 for (Aresta aresta : vertice.getListaAdjacencia()) {
                     // escreve o nome do vertice de destino e o peso da aresta
-                    bufferedWriter.write(aresta.getOrigem().getNome() + " " + aresta.getDestino().getNome() + " " + aresta.getPeso());
+                    bufferedWriter.write(aresta.getOrigem().getId() + " " + aresta.getDestino().getId() + " " + aresta.getPeso());
                     bufferedWriter.newLine();
                 }
 
             }
             // fecha o arquivo
+            
+            System.out.println("--------------------------------");
+            System.out.println("Guardando no caminho -> " + filePath);
             System.out.println("Grafo gravado com sucesso!");
+            System.out.println("--------------------------------");
             bufferedWriter.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -237,10 +278,9 @@ public class Graph {
     
     // Módulo de carregamento de Grafo de Arquivo (Formato Pajek em anexo);
     public void carregaPajek(String nomeArquivo){
-        System.out.println("--------------------------------");
+
+        // caminho do arquivo
         String filePath = "src/output/" + nomeArquivo + ".txt";
-        System.out.println("Carregando do caminho -> " + filePath);
-        System.out.println("--------------------------------");
 
         File arquivo = new File(filePath);
         try {
@@ -252,8 +292,7 @@ public class Graph {
             Scanner scanner = new Scanner(bufferedReader);
             // lê o cabeçalho do arquivo
             String linha = scanner.nextLine();
-            // lê o cabeçalho do arquivo
-            linha = scanner.nextLine();
+
             // percorre todos os vertices do grafo
             while (scanner.hasNextLine()) {
                 // lê o nome do vertice
@@ -263,7 +302,19 @@ public class Graph {
                     break;
                 }
                 // cria o vertice
-                this.criaVertice(linha);
+
+                // pegando o nome sem tirar o espaço dele
+                String nome = linha.substring(linha.indexOf("\"") + 1, linha.lastIndexOf("\""));
+                // vendo se n tem espaço no começo do nome
+                if (nome.charAt(0) == ' ') {
+                    nome = nome.substring(1);
+                }
+
+                int id = Integer.parseInt(linha.substring(0, linha.indexOf(" ")));
+
+                
+                this.criaVertice(nome, id);
+                System.out.println(this.tamanho);
             }
             // percorre todos os vertices do grafo
             while (scanner.hasNextLine()) {
@@ -271,12 +322,22 @@ public class Graph {
                 linha = scanner.nextLine();
                 // cria o vertice
                 String[] aresta = linha.split(" ");
-                this.criaAresta(aresta[0], aresta[1], Integer.parseInt(aresta[2]));
+
+                int origem = Integer.parseInt(aresta[0]);
+                int destino = Integer.parseInt(aresta[1]);
+                int peso = Integer.parseInt(aresta[2]);
+
+                this.criaAresta(origem, destino, peso);
+
             }
             // fecha o arquivo
             scanner.close();
 
+            System.out.println("--------------------------------");
+            System.out.println("Carregando do caminho -> " + filePath);
             System.out.println("Grafo carregado com sucesso!");
+            System.out.println("--------------------------------");
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -398,11 +459,14 @@ public class Graph {
             distancias[origin.getId()] = 0;
             origin.setVisitado(true);
 
-            // enquanto a fila não estiver vazia
+            
+            // usando dfs para percorrer o grafo
             while(!fila.isEmpty()){
-                fila.remove(); // remove o vertice da fila
+                // pega o vertice da fila
+                Vertice vertice = fila.poll();
+
                 // percorre a lista de adjacencia do vertice
-                for (Aresta aresta : origin.getListaAdjacencia()) {
+                for(Aresta aresta : vertice.getListaAdjacencia()){
                     // pega o vertice de destino da aresta
                     Vertice verticeDestino = aresta.getDestino();
                     // se o vertice de destino não foi visitado
@@ -412,10 +476,9 @@ public class Graph {
                         // adiciona o vertice de destino na fila
                         fila.add(verticeDestino);
                         // atualiza a distancia do vertice de destino
-                        distancias[verticeDestino.getId()] = distancias[origin.getId()] + 1;
+                        distancias[verticeDestino.getId()] = distancias[vertice.getId()] + 1;
                     }
                 }
-
             }
 
             // calcula a centralidade de proximidade do vertice
@@ -427,23 +490,142 @@ public class Graph {
         }
     }
     
+    // Função que calcula a Centralidade de Intermediação de cada nó (considere a distância do melhor caminho);
+    public void centralidadeIntermediacao(){
+            
+            for(Vertice origin : this.vertices.values()){
+                // criando as variaveis
+                Queue<Vertice> fila = new LinkedList<>(); // fila para percorrer o grafo
+                int[] distancias = new int[this.tamanho + 1]; // vetor para guardar as distancias
+                int[] predecessores = new int[this.tamanho + 1]; // vetor para guardar os predecessores
+                int[] intermedios = new int[this.tamanho + 1]; // vetor para guardar os intermedios
     
-    // utilitários
+                // zerando as distancias
+                for(int i = 0; i < distancias.length; i++){
+                    distancias[i] = -1;
+                }
+    
+                // colocando o vertice de origem na fila
+                fila.add(origin);
+    
+                // colocando a distancia do vertice de origem como 0
+                distancias[origin.getId()] = 0;
+                origin.setVisitado(true);
+    
+                // enquanto a fila não estiver vazia
+                while(!fila.isEmpty()){
+                    // remove o vertice da fila
+                    Vertice vertice = fila.remove();
+                    // percorre a lista de adjacencia do vertice
+                    for (Aresta aresta : vertice.getListaAdjacencia()) {
+                        // pega o vertice de destino da aresta
+                        Vertice verticeDestino = aresta.getDestino();
+                        // se o vertice de destino não foi visitado
+                        if(!verticeDestino.getVisitado()){
+                            // marca o vertice de destino como visitado
+                            verticeDestino.setVisitado(true);
+                            // adiciona o vertice de destino na fila
+                            fila.add(verticeDestino);
+                            // atualiza a distancia do vertice de destino
+                            distancias[verticeDestino.getId()] = distancias[vertice.getId()] + 1;
+                            // atualiza o predecessor do vertice de destino
+                            predecessores[verticeDestino.getId()] = vertice.getId();
+                        }
+                    }
+    
+                }
+    
+                // calcula a centralidade de intermediacao do vertice
+                calculaIntermediacao(origin, distancias, predecessores, intermedios);
+    
+                // limpa os vertices
+                this.limpaVertices();
+    
+            }
+    }
+
+    // função para gerar um grafo aleatoriamente
+    public Graph geradorGrafoAleatorio(int vertice, int arestas, boolean conexidade){
+
+        Graph grafo = new Graph();
+
+        String[] vertices = new String[vertice];
+
+        // adiciona os vertices
+        for(int i = 0; i < vertice; i++){
+            vertices[i] = "v" + i;
+            grafo.criaVertice(vertices[i]);
+        }
+
+
+        // verifica se o grafo é conexo
+        if(conexidade){
+            // criando o grafo aleatoriamente mas conexo
+            for(int i = 0; i < arestas/2; i++){
+                // pega um vertice aleatorio
+                int verticeAleatorio = (int) (Math.random() * vertice);
+                // pega outro vertice aleatorio
+                int verticeAleatorio2 = (int) (Math.random() * vertice);
+                // cria a aresta entre os vertices
+                grafo.criaArestaNaoDirecionada(vertices[verticeAleatorio], vertices[verticeAleatorio2], 1);
+            }
+        } // se o grafo não é conexo
+        else{
+            // criando o grafo aleatoriamente mas desconexo
+            for(int i = 0; i < arestas; i++){
+                // pega um vertice aleatorio
+                int verticeAleatorio = (int) (Math.random() * vertice);
+                // pega outro vertice aleatorio
+                int verticeAleatorio2 = (int) (Math.random() * vertice);
+                // cria a aresta entre os vertices
+                grafo.criaAresta(vertices[verticeAleatorio], vertices[verticeAleatorio2], 1);
+            }
+        }
+
+
+        return grafo;
+    }
+
+        // utilitários
 
     // função de calculo da centralidade de proximidade
     private void calculaProximidade(Vertice origin, int[] distancias){
+        double soma = 0;
         double centralidade = 0; // variavel para guardar a centralidade de proximidade
         for(int i = 1; i < distancias.length; i++){
-            centralidade += Math.pow(2, -distancias[i]); // soma a centralidade
+            // soma a distancia
+            soma += distancias[i];
         }
 
+        centralidade = (this.tamanho - 1) / soma;
         // imprime a centralidade de proximidade do vertice
         System.out.println("Centralidade de proximidade do vertice " + origin.getNome() + ": " + centralidade);
         // adiciona a centralidade de proximidade do vertice no vertice
         origin.setProximidade(centralidade);
     }
-    
-    
+
+
+    // função de calculo da centralidade de intermediacao
+    private void calculaIntermediacao(Vertice origin, int[] distancias, int[] predecessores, int[] intermedios){
+        double centralidade = 0; // variavel para guardar a centralidade de intermediacao
+        for(int i = 1; i < distancias.length; i++){
+            for(int j = 1; j < distancias.length; j++){
+                if(distancias[j] > distancias[i] && predecessores[j] == i){
+                    intermedios[i]++;
+                }
+            }
+        }
+
+        for(int i = 1; i < distancias.length; i++){
+            centralidade += intermedios[i];
+        }
+
+        // imprime a centralidade de intermediacao do vertice
+        System.out.println("Centralidade de intermediacao do vertice " + origin.getNome() + ": " + centralidade);
+        // adiciona a centralidade de intermediacao do vertice no vertice
+        origin.setIntermediacao(centralidade);
+    }
+
     // Função que verifica se o grafo é conexo ou não;
     private boolean conexo(){
         // cria uma lista de vertices visitados

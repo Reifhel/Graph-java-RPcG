@@ -8,11 +8,19 @@ public class Main {
     public static void main(String[] args) throws Exception {
         Graph graph = new Graph();
 
-        graph.carregaPajek("teste");
-        graph.centralidadeProximidade();
-        //graph.gravaPajek("teste");
+        //graph.carregaPajek("teste");
 
-        //graph.infoGrafo();
+        // graph.leTxt("actors");
+        graph.carregaPajek("movieDataSet");
+
+        graph.centralidadeProximidade();
+        
+
+        //graph.gravaPajek("jorge");    
+        //graph.centralidadeProximidade();
+        
+        System.out.println("tamanho: " + graph.getTamanho());
+
 
     }
 }

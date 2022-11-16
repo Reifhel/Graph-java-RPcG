@@ -1,6 +1,7 @@
 # Graph Java Class
 
 Trabalho sendo desenvolvido para a faculdade na materia de Resolução de Problemas com Grafos (RPcG)
+
 ## Funções base do grafo
 - criar aresta, tanto direcionada quanto não direcionada
 - mostrar tamanho do grafo

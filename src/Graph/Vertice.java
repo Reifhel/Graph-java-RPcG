@@ -9,8 +9,11 @@ public class Vertice {
     private int id;
 
     private double proximidade;
+    private double intermediacao;
 
     private boolean visitado;
+    private int distancia;
+    private Vertice pai;
 
 
     public Vertice(String nome, int id) {
@@ -53,12 +56,36 @@ public class Vertice {
         this.proximidade = proximidade;
     }
 
+    public double getIntermediacao() {
+        return intermediacao;
+    }
+
+    public void setIntermediacao(double intermediacao) {
+        this.intermediacao = intermediacao;
+    }
+
     public int getId() {
         return id;
     }
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getDistancia() {
+        return distancia;
+    }
+
+    public void setDistancia(int distancia) {
+        this.distancia = distancia;
+    }
+
+    public Vertice getPai() {
+        return pai;
+    }
+
+    public void setPai(Vertice pai) {
+        this.pai = pai;
     }
 
 }

@@ -11,7 +11,7 @@ public class Main {
         //graph.carregaPajek("teste");
 
         // graph.leTxt("actors");
-        graph.carregaPajek("movieDataSet");
+        graph.carregaPajek("actors");
 
         graph.centralidadeProximidade();
         

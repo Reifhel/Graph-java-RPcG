@@ -280,7 +280,7 @@ public class Graph {
     public void carregaPajek(String nomeArquivo){
 
         // caminho do arquivo
-        String filePath = "src/output/" + nomeArquivo + ".txt";
+        String filePath = "src/input/" + nomeArquivo + ".txt";
 
         File arquivo = new File(filePath);
         try {

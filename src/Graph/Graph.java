@@ -46,6 +46,14 @@ public class Graph {
         return tamanho;
     }
 
+    public int getTamanhoArestas() {
+        int tamanhoArestas = 0;
+        for (Vertice v : vertices.values()) {
+            tamanhoArestas += v.getListaAdjacencia().size();
+        }
+        return tamanhoArestas;
+    }
+
     private boolean criaVertice(String nome, int id) {
         // verifica se o vertice já existe
         if (this.vertices.containsKey(nome)) {
@@ -85,6 +93,8 @@ public class Graph {
             this.criaVertice(destino);
         }
 
+
+
         // pegando os vertices de origem e destino
         Vertice origemVertice = this.vertices.get(origem);
         Vertice destinoVertice = this.vertices.get(destino);
@@ -99,7 +109,7 @@ public class Graph {
         try{
             String origem = getVertice(idOrigem).getNome();
             String destino = getVertice(idDestino).getNome();
-            criaAresta(origem, destino, peso);
+            this.criaAresta(origem, destino, peso);
             return true;
         }
         catch(Exception e){
@@ -720,7 +730,7 @@ public class Graph {
                 System.out.println("Subgrafo " + contador + ": ");
                 for (Vertice vertice : subgrafo) {
                     // imprime o nome do vertice
-                    System.out.print(vertice.getNome() + " ");
+                    System.out.print(vertice.getNome() + " | ");
                 }
                 contador++;
                 // pula uma linha
@@ -747,8 +757,10 @@ public class Graph {
         System.out.println("--------------------------------");
         System.out.println("Informações do grafo: ");
         System.out.println("Tamanho do grafo: " + this.tamanho); // mostra o tamanho do grafo
+        System.out.println("Arestas do grafo: " + this.getTamanhoArestas()); // mostra o numero de arestas do grafo
         System.out.print("Conexidade: " ); this.verificaConexidade(); // mostra a conexidade do grafo e seus componentes caso desconexo
         System.out.print("Euleriano: " ); this.verificaEuleriano(); // mostra se o grafo é euleriano
+        System.out.print("Ciclos: " );  this.verificaCiclo(); // mostra se o grafo tem ciclos");
 
         // print do grafo com a lista de adjacencia
         System.out.println("--------------------------------");

@@ -11,16 +11,13 @@ public class Main {
         //graph.carregaPajek("teste");
 
         // graph.leTxt("actors");
-        graph.carregaPajek("actors");
+        graph.carregaPajek("grafoExemplo");
 
+        graph.infoGrafo();
         graph.centralidadeProximidade();
         
-
         //graph.gravaPajek("jorge");    
         //graph.centralidadeProximidade();
-        
-        System.out.println("tamanho: " + graph.getTamanho());
-
 
     }
 }
